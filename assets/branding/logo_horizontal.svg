@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  <!-- Background -->
+  <rect width="240" height="60" rx="8" fill="#0F172A"/>
+  <!-- Icon Shield -->
+  <g transform="translate(14, 10)">
+    <path d="M20 5L32 10V20C32 27.5 20 35 20 35C20 35 8 27.5 8 20V10L20 5Z" fill="#D97706" fill-opacity="0.25" stroke="#D97706" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="20" cy="15" r="3.5" fill="#F59E0B"/>
+    <path d="M15 26L20 20L25 26" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M13 22L20 17L27 22" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="62" y="32" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" fill="#FFFFFF" letter-spacing="1.5">SIKAPTA</text>
+  <text x="160" y="32" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" fill="#F59E0B" letter-spacing="1.5">AI</text>
+  <text x="63" y="44" font-family="system-ui, -apple-system, sans-serif" font-weight="500" font-size="7.5" fill="#94A3B8" letter-spacing="0.5">PRESISI GERAK, AKURASI PENILAIAN</text>
+</svg>
+

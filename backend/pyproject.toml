@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sikapta-ai"
+version = "1.0.0"
+description = "Sistem Inteligensi Kesamaptaan Jasmani Terpadu dan Adaptif (SIKAPTA AI) - Core Service"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "SIKAPTA AI Team" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+pythonpath = [
+    ".",
+]
+
