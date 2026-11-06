@@ -327,4 +327,33 @@ export interface WaveRunLiveState {
   error?: string;
 }
 
+export type UserRole = 'admin' | 'examiner' | 'operator' | 'event_manager' | 'coach';
+
+export interface UserAccount {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  role_label?: string;
+  role_description?: string;
+  is_active: boolean;
+  last_login?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthLoginResponse {
+  access_token: string;
+  token_type: string;
+  user: UserAccount;
+}
+
+export interface RoleDefinition {
+  code: UserRole;
+  label: string;
+  description: string;
+}
+
+
 

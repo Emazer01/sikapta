@@ -2,7 +2,7 @@ import {
   Participant, Camera, RuleProfile, AssessmentSession,
   ModelBenchmark, DashboardStats, SamaptaEvent, EventParticipant,
   BulkEventParticipantItem, BulkEventParticipantsResponse, EventRecapResponse,
-  WaveRunLiveState
+  WaveRunLiveState, UserAccount, AuthLoginResponse, RoleDefinition, UserRole
 } from '../types';
 
 const API_BASE = '/api';
@@ -24,6 +24,9 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
+    if (response.status === 401 && endpoint !== '/auth/login') {
+      window.dispatchEvent(new CustomEvent('sikapta:unauthorized'));
+    }
     let errorDetail = 'Terjadi kesalahan sistem';
     try {
       const errorJson = await response.json();
@@ -42,6 +45,50 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Authentication & User Management
+  login: (data: { username: string; password: string }) =>
+    request<AuthLoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getMe: () => request<UserAccount>('/auth/me'),
+  logout: () =>
+    request<{ status: string; message: string }>('/auth/logout', {
+      method: 'POST',
+    }),
+  getRoles: () => request<RoleDefinition[]>('/auth/roles'),
+  getUsers: () => request<UserAccount[]>('/auth/users'),
+  createUser: (data: {
+    username: string;
+    email: string;
+    full_name: string;
+    role: UserRole;
+    password: string;
+    is_active?: boolean;
+  }) =>
+    request<UserAccount>('/auth/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateUser: (
+    id: number,
+    data: {
+      email?: string;
+      full_name?: string;
+      role?: UserRole;
+      is_active?: boolean;
+      password?: string;
+    }
+  ) =>
+    request<UserAccount>(`/auth/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteUser: (id: number) =>
+    request<void>(`/auth/users/${id}`, {
+      method: 'DELETE',
+    }),
+
   // Health
   getHealth: () => request<{ status: string; database: { status: string; dialect: string } }>('/health'),
 

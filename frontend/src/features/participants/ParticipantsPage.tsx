@@ -16,9 +16,12 @@ import {
 import { api } from '../../services/api';
 import { Participant } from '../../types';
 import { BulkParticipantModal } from './BulkParticipantModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const ParticipantsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { hasRole } = useAuth();
+  const canManageParticipants = hasRole('admin', 'event_manager', 'examiner');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
@@ -178,22 +181,24 @@ export const ParticipantsPage: React.FC = () => {
           </select>
         </div>
 
-        <div className="flex items-center space-x-2.5 shrink-0">
-          <button
-            onClick={() => setShowBulkModal(true)}
-            className="flex items-center space-x-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-sm shadow-md transition-colors cursor-pointer"
-          >
-            <Upload className="w-4 h-4" />
-            <span>Tambah Massal (Bulk Insert)</span>
-          </button>
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold px-4 py-2 rounded-lg text-sm shadow-md transition-colors shrink-0 cursor-pointer"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Tambah Peserta Baru</span>
-          </button>
-        </div>
+        {canManageParticipants && (
+          <div className="flex items-center space-x-2.5 shrink-0">
+            <button
+              onClick={() => setShowBulkModal(true)}
+              className="flex items-center space-x-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-sm shadow-md transition-colors cursor-pointer"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Tambah Massal (Bulk Insert)</span>
+            </button>
+            <button
+              onClick={handleOpenAdd}
+              className="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold px-4 py-2 rounded-lg text-sm shadow-md transition-colors shrink-0 cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Tambah Peserta Baru</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Participants Table */}
@@ -253,20 +258,24 @@ export const ParticipantsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4 inline" />
                       </button>
-                      <button
-                        onClick={() => handleOpenEdit(p)}
-                        className="text-amber-600 hover:text-amber-700 p-1 cursor-pointer"
-                        title="Edit Data"
-                      >
-                        <Edit2 className="w-4 h-4 inline" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id, p.full_name)}
-                        className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
-                        title="Hapus Data"
-                      >
-                        <Trash2 className="w-4 h-4 inline" />
-                      </button>
+                      {canManageParticipants && (
+                        <>
+                          <button
+                            onClick={() => handleOpenEdit(p)}
+                            className="text-amber-600 hover:text-amber-700 p-1 cursor-pointer"
+                            title="Edit Data"
+                          >
+                            <Edit2 className="w-4 h-4 inline" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id, p.full_name)}
+                            className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
+                            title="Hapus Data"
+                          >
+                            <Trash2 className="w-4 h-4 inline" />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))

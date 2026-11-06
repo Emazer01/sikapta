@@ -9,7 +9,7 @@ from app.schemas.camera import (
     CameraCreate, CameraUpdate, CameraResponse, CameraTestRequest, CameraTestResponse
 )
 from app.services.camera.manager import camera_manager
-from app.api.deps import get_current_user
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/cameras", tags=["Cameras"])
 
@@ -21,7 +21,7 @@ def get_cameras(db: Session = Depends(get_db)):
 def create_camera(
     data: CameraCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "operator"))
 ):
     camera_dict = data.model_dump()
     rtsp_pw = camera_dict.pop("rtsp_password", None)
@@ -68,7 +68,7 @@ def update_camera(
     camera_id: int,
     data: CameraUpdate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "operator"))
 ):
     camera = db.query(Camera).filter(Camera.id == camera_id).first()
     if not camera:
@@ -93,7 +93,7 @@ def update_camera(
 def delete_camera(
     camera_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "operator"))
 ):
     camera = db.query(Camera).filter(Camera.id == camera_id).first()
     if not camera:

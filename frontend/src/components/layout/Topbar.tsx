@@ -1,8 +1,9 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Database, Cpu, User, Menu } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Database, Cpu, User, Menu, LogOut } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { useAuth, ROLE_METADATA } from '../../contexts/AuthContext';
 
 const routeNames: Record<string, string> = {
   '/': 'Dashboard Pemantauan',
@@ -13,7 +14,7 @@ const routeNames: Record<string, string> = {
   '/history': 'Riwayat Sesi Asesmen',
   '/benchmark': 'Benchmark & Komparasi Model AI',
   '/reports': 'Dokumentasi & Laporan Resmi',
-  '/settings': 'Pengaturan Sistem & Aturan Gerakan',
+  '/settings': 'Pengaturan Sistem & Manajemen Akun',
 };
 
 interface TopbarProps {
@@ -22,6 +23,8 @@ interface TopbarProps {
 
 export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const currentTitle = routeNames[location.pathname] || 'SIKAPTA AI';
 
   const { data: health } = useQuery({
@@ -36,6 +39,12 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
   });
 
   const isDbConnected = health?.database?.status === 'connected';
+  const roleMeta = user ? ROLE_METADATA[user.role] : null;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between shadow-xs shrink-0">
@@ -84,15 +93,28 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
           </span>
         </div>
 
-        {/* User Profile */}
+        {/* User Profile & Logout */}
         <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/40">
+          <div className="w-8 h-8 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/40 shrink-0">
             <User className="w-4 h-4" />
           </div>
-          <div className="text-left hidden lg:block">
-            <div className="text-xs font-bold text-slate-800 leading-tight">Penguji / Admin</div>
-            <div className="text-[10px] text-slate-400">SIKAPTA Examiner</div>
+          <div className="text-left hidden sm:block max-w-[180px]">
+            <div className="text-xs font-bold text-slate-800 leading-tight truncate">
+              {user?.full_name || 'Pengguna SIKAPTA'}
+            </div>
+            <div className="text-[10px] font-semibold text-amber-600 truncate">
+              {roleMeta?.label || user?.role_label || 'Penguji'}
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Keluar dari akun"
+            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 hover:border-red-200 transition cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Keluar</span>
+          </button>
         </div>
       </div>
     </header>

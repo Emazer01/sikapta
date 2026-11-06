@@ -3,7 +3,6 @@ from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.database import Base, engine, SessionLocal
-from app.core.security import hash_password
 from app.models.user import User
 from app.models.participant import Participant
 from app.models.camera import Camera
@@ -16,6 +15,8 @@ def init_db():
     # Ensure schema updates for existing tables
     with engine.connect() as conn:
         try:
+            conn.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(30)"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP WITH TIME ZONE"))
             conn.execute(text("ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS gender VARCHAR(10) DEFAULT 'L'"))
             conn.execute(text("ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS tolerance_deg FLOAT DEFAULT 5.0"))
             conn.execute(text("ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS source_type VARCHAR(20) DEFAULT 'camera'"))
@@ -30,21 +31,7 @@ def init_db():
 
     db: Session = SessionLocal()
     try:
-        # 1. Create Default Admin User
-        admin_user = db.query(User).filter(User.username == "admin").first()
-        if not admin_user:
-            admin_user = User(
-                username="admin",
-                email="admin@sikapta.local",
-                hashed_password=hash_password("admin123"),
-                full_name="Administrator SIKAPTA AI",
-                role="admin",
-                is_active=True
-            )
-            db.add(admin_user)
-            print("[DB] Created default admin user: admin / admin123")
-
-        # 2. Create Default Rule Profiles
+        # 1. Create Default Rule Profiles
         # Push-up profile
         pushup_profile = db.query(RuleProfile).filter(RuleProfile.exercise_type == "pushup", RuleProfile.is_default == True).first()
         if not pushup_profile:

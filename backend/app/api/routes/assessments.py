@@ -22,7 +22,7 @@ from app.schemas.assessment import (
 )
 from app.services.assessment.session_manager import session_manager
 from app.services.assessment.video_processor import VideoProcessorService
-from app.api.deps import get_current_user
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/assessments", tags=["Assessments"])
 
@@ -78,7 +78,7 @@ def generate_session_code(db: Session) -> str:
 def create_assessment_session(
     data: AssessmentSessionCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner", "operator"))
 ):
     participant = db.query(Participant).filter(Participant.id == data.participant_id).first()
     if not participant:
@@ -167,7 +167,7 @@ def control_assessment_session(
     session_id: int,
     req: SessionControlRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner", "operator"))
 ):
     session_record = db.query(AssessmentSession).filter(AssessmentSession.id == session_id).first()
     if not session_record:
@@ -273,7 +273,7 @@ def assign_participant_to_session(
     session_id: int,
     req: AssignParticipantRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner", "operator"))
 ):
     session_record = db.query(AssessmentSession).filter(AssessmentSession.id == session_id).first()
     if not session_record:
@@ -363,7 +363,7 @@ def approve_assessment_session(
     session_id: int,
     req: ApproveSessionRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner"))
 ):
     """
     Menyetujui dan menyimpan hasil pengujian ke database secara resmi.
@@ -418,7 +418,7 @@ def reject_assessment_session(
     session_id: int,
     req: RejectSessionRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner"))
 ):
     """
     Menolak atau membatalkan hasil pengujian sehingga tidak disimpan ke rekapitulasi resmi.
@@ -465,7 +465,7 @@ async def upload_and_process_video(
     event_id: Optional[int] = Form(None),
     examiner_notes: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "examiner", "operator"))
 ):
     """
     Upload a video file to run automated movement detection and analytics.

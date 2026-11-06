@@ -25,9 +25,12 @@ import {
   Legend
 } from 'recharts';
 import { api } from '../../services/api';
+import { useAuth, ROLE_METADATA } from '../../contexts/AuthContext';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, canAccessPath } = useAuth();
+  const roleMeta = user ? ROLE_METADATA[user.role] : null;
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: api.getDashboardStats,
@@ -61,22 +64,46 @@ export const DashboardPage: React.FC = () => {
       {/* Institutional Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-xl p-6 text-white shadow-md border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <div className="flex items-center space-x-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1 flex-wrap gap-y-1">
             <ShieldCheck className="w-4 h-4" />
             <span>Sistem Inteligensi Kesamaptaan Jasmani Terpadu</span>
+            {roleMeta && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${roleMeta.badgeClass}`}>
+                Peran Aktif: {roleMeta.label}
+              </span>
+            )}
           </div>
           <h2 className="text-2xl font-black text-white">SIKAPTA AI Monitoring Hub</h2>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-            Platform Computer Vision dan Pose Estimation real-time untuk akurasi penilaian uji kesamaptaan fisik berbasis AI.
+            {roleMeta?.description ||
+              'Platform Computer Vision dan Pose Estimation real-time untuk akurasi penilaian uji kesamaptaan fisik berbasis AI.'}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/assessment')}
-          className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-lg shadow-md transition-all shrink-0 cursor-pointer"
-        >
-          <Play className="w-4 h-4 fill-current" />
-          <span>Mulai Uji Langsung</span>
-        </button>
+        {canAccessPath('/assessment') ? (
+          <button
+            onClick={() => navigate('/assessment')}
+            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-lg shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <Play className="w-4 h-4 fill-current" />
+            <span>Mulai Uji Langsung</span>
+          </button>
+        ) : user?.role === 'event_manager' ? (
+          <button
+            onClick={() => navigate('/events')}
+            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-lg shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>Kelola Kegiatan Samapta</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/reports')}
+            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-lg shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>Tinjau Laporan & Evaluasi</span>
+          </button>
+        )}
       </div>
 
       {/* Metric Cards Grid */}

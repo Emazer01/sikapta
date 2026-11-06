@@ -7,7 +7,7 @@ from app.models.rule_profile import RuleProfile
 from app.schemas.rule_profile import (
     RuleProfileCreate, RuleProfileUpdate, RuleProfileResponse
 )
-from app.api.deps import get_current_user
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/rule-profiles", tags=["Rule Profiles"])
 
@@ -25,7 +25,7 @@ def get_rule_profiles(
 def create_rule_profile(
     data: RuleProfileCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin"))
 ):
     profile = RuleProfile(**data.model_dump())
     db.add(profile)
@@ -45,7 +45,7 @@ def update_rule_profile(
     profile_id: int,
     data: RuleProfileUpdate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin"))
 ):
     profile = db.query(RuleProfile).filter(RuleProfile.id == profile_id).first()
     if not profile:

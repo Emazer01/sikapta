@@ -36,6 +36,7 @@ from app.services.assessment.running_score import (
     calculate_calisthenics_score,
     evaluate_total_samapta,
 )
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/events", tags=["Samapta Events"])
 
@@ -102,7 +103,11 @@ def get_events(
 
 
 @router.post("", response_model=SamaptaEventResponse, status_code=status.HTTP_201_CREATED)
-def create_event(event_in: SamaptaEventCreate, db: Session = Depends(get_db)):
+def create_event(
+    event_in: SamaptaEventCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles("admin", "event_manager"))
+):
     event_code = generate_event_code(db)
     new_event = SamaptaEvent(
         event_code=event_code,
@@ -161,7 +166,12 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{event_id}", response_model=SamaptaEventResponse)
-def update_event(event_id: int, event_in: SamaptaEventUpdate, db: Session = Depends(get_db)):
+def update_event(
+    event_id: int,
+    event_in: SamaptaEventUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles("admin", "event_manager"))
+):
     event = db.query(SamaptaEvent).filter(SamaptaEvent.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Kegiatan Samapta tidak ditemukan")
@@ -192,7 +202,11 @@ def update_event(event_id: int, event_in: SamaptaEventUpdate, db: Session = Depe
 
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: int, db: Session = Depends(get_db)):
+def delete_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles("admin", "event_manager"))
+):
     event = db.query(SamaptaEvent).filter(SamaptaEvent.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Kegiatan Samapta tidak ditemukan")

@@ -10,7 +10,7 @@ from app.schemas.participant import (
     ParticipantCreate, ParticipantUpdate, ParticipantResponse,
     ParticipantBulkCreate, ParticipantBulkResponse
 )
-from app.api.deps import get_current_user
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/participants", tags=["Participants"])
 
@@ -44,7 +44,7 @@ def get_participants(
 def create_participant(
     data: ParticipantCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "event_manager", "examiner"))
 ):
     existing = db.query(Participant).filter(Participant.participant_number == data.participant_number).first()
     if existing:
@@ -75,7 +75,7 @@ def create_participant(
 def bulk_create_participants(
     payload: ParticipantBulkCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "event_manager", "examiner"))
 ):
     inserted = 0
     updated = 0
@@ -156,7 +156,7 @@ def update_participant(
     participant_id: int,
     data: ParticipantUpdate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "event_manager", "examiner"))
 ):
     participant = db.query(Participant).filter(Participant.id == participant_id).first()
     if not participant:
@@ -190,7 +190,7 @@ def update_participant(
 def delete_participant(
     participant_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(require_roles("admin", "event_manager", "examiner"))
 ):
     participant = db.query(Participant).filter(Participant.id == participant_id).first()
     if not participant:
